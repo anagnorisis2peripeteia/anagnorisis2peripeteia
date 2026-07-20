@@ -1,5 +1,3 @@
-# Cameron Beeley
-
 Open-source contributor
 
 ![GitHub metrics](./metrics.svg)
