@@ -49,7 +49,7 @@ jobs:
               repository.additions = 0; repository.deletions = 0; repository.commits = 0;
               let cursor = null, pages = 0;
               do {
-                const data = await github.graphql(`query($owner:String!,$name:String!,$cursor:String){repository(owner:$owner,name:$name){defaultBranchRef{target{... on Commit{history(first:100,after:$cursor){nodes{additions deletions authors(first:100){nodes{user{login}}}} pageInfo{hasNextPage endCursor}}}}}}`, { owner, name, cursor });
+                const data = await github.graphql(`query($owner:String!,$name:String!,$cursor:String){repository(owner:$owner,name:$name){defaultBranchRef{target{... on Commit{history(first:100,after:$cursor){nodes{additions deletions authors(first:100){nodes{user{login}}}} pageInfo{hasNextPage endCursor}}}}}}}`, { owner, name, cursor });
                 const history = data.repository.defaultBranchRef?.target?.history;
                 if (!history) break;
                 for (const commit of history.nodes) if (commit.authors.nodes.some(({user}) => user?.login?.toLowerCase() === login.toLowerCase())) { repository.commits++; repository.additions += commit.additions; repository.deletions += commit.deletions; }
