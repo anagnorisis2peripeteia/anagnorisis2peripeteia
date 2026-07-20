@@ -20,12 +20,25 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const login = context.repo.owner;
-            const queries = [`is:pr author:${login} is:merged`, `is:pr author:${login} is:closed label:merged`];
+            const queries = [
+              `is:pr author:${login} is:merged`,
+              `is:pr author:${login} is:closed label:merged`,
+            ];
             const matches = new Map();
             for (const query of queries) {
-              const { data } = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 100 });
-              for (const item of data.items) matches.set(item.id, item);
+              for (let page = 1; ; page += 1) {
+                const { data } = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 100, page });
+                for (const item of data.items) {
+                  matches.set(item.id, item);
+                }
+                if (data.items.length < 100) break;
+              }
             }
+
+            const viewer = await github.graphql(`query { viewer { id login } }`);
+            const viewerLogin = String(viewer.viewer.login).toLowerCase();
+            const viewerId = viewer.viewer.id;
+
             const repositories = new Map();
             for (const item of matches.values()) {
               const fullName = new URL(item.repository_url).pathname
@@ -36,39 +49,163 @@ jobs:
                 const { data } = await github.rest.repos.get({
                   owner, repo,
                 });
-                repositories.set(fullName, { stars: data.stargazers_count, language: data.language, topics: (data.topics || []).slice(0, 2), count: 0 });
+                repositories.set(
+                  fullName,
+                  {
+                    stars: data.stargazers_count,
+                    language: data.language,
+                    topics: (data.topics || []).slice(0, 3),
+                    count: 0,
+                    prNumbers: new Set(),
+                  },
+                );
               }
-              repositories.get(fullName).count += 1;
+              const repository = repositories.get(fullName);
+              repository.count += 1;
+              repository.prNumbers.add(item.number);
             }
-            const selected = [...repositories.entries()]
+
+            const toInt = (value) => Number(value || 0);
+            const addCommit = (entry, commit, seenCommits) => {
+              if (!commit?.oid || seenCommits.has(commit.oid)) return;
+              seenCommits.add(commit.oid);
+              entry.commits += 1;
+              entry.additions += toInt(commit.additions);
+              entry.deletions += toInt(commit.deletions);
+            };
+
+            let selected = [...repositories.entries()]
               .sort((a, b) => b[1].count - a[1].count || b[1].stars - a[1].stars)
               .slice(0, 10)
               .map(([name, value]) => ({ name, ...value }));
+
+            const authorHistoryQuery = `
+              query($owner: String!, $name: String!, $cursor: String, $author: CommitAuthor!) {
+                repository(owner: $owner, name: $name) {
+                  defaultBranchRef {
+                    target {
+                      ... on Commit {
+                        history(first: 100, after: $cursor, author: $author) {
+                          nodes { oid additions deletions }
+                          pageInfo { hasNextPage endCursor }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            const pullRequestCommitQuery = `
+              query($owner: String!, $name: String!, $number: Int!, $cursor: String) {
+                repository(owner: $owner, name: $name) {
+                  pullRequest(number: $number) {
+                    commits(first: 100, after: $cursor) {
+                      nodes {
+                        commit {
+                          oid
+                          additions
+                          deletions
+                          author { user { login } }
+                          authors(first: 100) { nodes { user { login } } }
+                        }
+                      }
+                      pageInfo { hasNextPage endCursor }
+                    }
+                  }
+                }
+              }
+            `;
+
             for (const repository of selected) {
               const [owner, name] = repository.name.split("/");
               repository.additions = 0; repository.deletions = 0; repository.commits = 0;
+              const seenCommits = new Set();
               let cursor = null, pages = 0;
               do {
-                const data = await github.graphql(`query($owner:String!,$name:String!,$cursor:String){repository(owner:$owner,name:$name){defaultBranchRef{target{... on Commit{history(first:100,after:$cursor){nodes{additions deletions authors(first:100){nodes{user{login}}}} pageInfo{hasNextPage endCursor}}}}}}}`, { owner, name, cursor });
+                const data = await github.graphql(authorHistoryQuery, { owner, name, cursor, author: { id: viewerId } });
                 const history = data.repository.defaultBranchRef?.target?.history;
                 if (!history) break;
-                for (const commit of history.nodes) if (commit.authors.nodes.some(({user}) => user?.login?.toLowerCase() === login.toLowerCase())) { repository.commits++; repository.additions += commit.additions; repository.deletions += commit.deletions; }
+                for (const commit of history.nodes || []) {
+                  if (!commit?.oid) continue;
+                  addCommit(repository, commit, seenCommits);
+                }
                 cursor = history.pageInfo.hasNextPage ? history.pageInfo.endCursor : null;
               } while (cursor && ++pages < 20);
+
+                for (const prNumber of repository.prNumbers) {
+                  let prCursor = null;
+                  let prPages = 0;
+                  do {
+                    const prData = await github.graphql(pullRequestCommitQuery, {
+                      owner,
+                      name,
+                      number: prNumber,
+                      cursor: prCursor,
+                    });
+                    const prCommits = prData.repository?.pullRequest?.commits;
+                    if (!prCommits) break;
+                    for (const prCommitNode of prCommits.nodes || []) {
+                      const commit = prCommitNode.commit;
+                      if (!commit?.oid) continue;
+                      const authors = new Set();
+                      if (commit.author?.user?.login) {
+                        authors.add(commit.author.user.login.toLowerCase());
+                      }
+                      for (const commitAuthor of commit.authors?.nodes || []) {
+                        if (commitAuthor?.user?.login) {
+                          authors.add(commitAuthor.user.login.toLowerCase());
+                        }
+                      }
+                      if (authors.has(viewerLogin)) {
+                        addCommit(repository, commit, seenCommits);
+                      }
+                    }
+                    prCursor = prCommits.pageInfo?.hasNextPage ? prCommits.pageInfo.endCursor : null;
+                  } while (prCursor && ++prPages < 20);
+                }
             }
+
+            selected = selected.map((repository) => ({
+              ...repository,
+              totalContributions: repository.count + repository.commits,
+            }));
+            selected.sort((a, b) => b.totalContributions - a.totalContributions || b.count - a.count || b.stars - a.stars);
+
             const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({
               "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;",
             })[char]);
+            const plural = (count, singular, pluralWord) => `${count} ${count === 1 ? singular : pluralWord}`;
+            const formatNumber = (value) => toInt(value).toLocaleString();
             const rows = selected.map((repository, index) => {
-              const y = 120 + index * 92;
+              const y = 132 + index * 98;
               const title = repository.name.length > 46
                 ? `${repository.name.slice(0, 43)}...`
                 : repository.name;
+              const tags = [repository.language, ...repository.topics]
+                .filter(Boolean)
+                .map((tag) => escape(tag))
+                .slice(0, 4)
+                .join(" · ");
               const total = repository.count + repository.commits;
-              return `<a href="https://github.com/${escape(repository.name)}"><circle cx="48" cy="${y - 7}" r="25" fill="#ddf4ff" stroke="#54aeff"/><text x="48" y="${y - 2}" fill="#0969da" font-size="14" font-weight="700" text-anchor="middle">${total}</text><text x="88" y="${y - 8}" fill="#0366d6" font-size="18" font-weight="600">${escape(title)}</text><text x="88" y="${y + 16}" fill="#586069" font-size="13">${repository.count} PRs merged  ·  +${repository.additions.toLocaleString()}  ·  −${repository.deletions.toLocaleString()}</text><path d="M24 ${y + 40}H736" stroke="#e1e4e8"/></a>`;
+              return `
+                <a href="https://github.com/${escape(repository.name)}">
+                  <rect x="24" y="${y - 28}" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
+                  <circle cx="62" cy="${y + 8}" r="23" fill="#ddf4ff" stroke="#54aeff"/>
+                  <text x="62" y="${y + 14}" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">${total}</text>
+                  <text x="96" y="${y - 6}" fill="#0366d6" font-size="18" font-weight="600">${escape(title)}</text>
+                  <text x="96" y="${y + 16}" fill="#24292f" font-size="14" font-weight="500">${plural(repository.count, "PR merged", "PRs merged")}</text>
+                  <text x="96" y="${y + 38}" fill="#586069" font-size="13">+${formatNumber(repository.additions)} added  ·  -${formatNumber(repository.deletions)} removed</text>
+                  <text x="96" y="${y + 60}" fill="#6a737d" font-size="12">${tags}</text>
+                  <path d="M24 ${y + 50}H736" stroke="#e1e4e8"/>
+                </a>`;
             }).join("");
-            const height = 150 + selected.length * 92;
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}" viewBox="0 0 760 ${height}" role="img"><text x="24" y="38" fill="#24292f" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="22" font-weight="600">Repository contributions</text><text x="24" y="64" fill="#586069" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="14">Bubble = merged PRs plus authored/co-authored commits on external repositories</text><g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${rows || '<text x="24" y="112" fill="#586069" font-size="15">No qualifying pull requests found yet.</text>'}</g></svg>`;
+            const height = 188 + selected.length * 98;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}" viewBox="0 0 760 ${height}" role="img">
+              <rect width="760" height="${height}" fill="#ffffff" fill-opacity="0.5"/>
+              <text x="24" y="42" fill="#24292f" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="24" font-weight="600">Repository contributions</text>
+              <text x="24" y="68" fill="#586069" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="14">Merged PRs plus authored/co-authored commits on external repositories</text>
+              <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${rows || '<text x="24" y="122" fill="#586069" font-size="15">No qualifying pull requests found yet.</text>'}</g>
+            </svg>`;
             const path = "upstream-contributions.svg";
             let existing;
             try {
