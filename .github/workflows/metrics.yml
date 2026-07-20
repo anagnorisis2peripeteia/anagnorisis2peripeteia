@@ -27,7 +27,8 @@ jobs:
             });
             const repositories = new Map();
             for (const item of result.data.items) {
-              const fullName = new URL(item.repository_url).pathname.slice(1);
+              const fullName = new URL(item.repository_url).pathname
+                .replace(/^\/repos\//, "");
               if (!repositories.has(fullName)) {
                 const { data } = await github.rest.repos.get({
                   owner: fullName.split("/")[0],
