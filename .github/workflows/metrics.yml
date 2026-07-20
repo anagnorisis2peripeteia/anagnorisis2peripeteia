@@ -53,11 +53,11 @@ jobs:
                 ? `${repository.name.slice(0, 43)}...`
                 : repository.name;
               const tags = [repository.language, `★ ${repository.stars.toLocaleString()}`, ...repository.topics].filter(Boolean).slice(0, 4);
-              const tagMarkup = tags.map((tag, tagIndex) => `<text x="${44 + tagIndex * 136}" y="${y + 28}" fill="#8b949e" font-size="13">${escape(tag)}</text>`).join("");
-              return `<a href="https://github.com/${escape(repository.name)}"><rect x="24" y="${y - 34}" width="712" height="70" rx="10" fill="#161b22"/><text x="44" y="${y}" fill="#58a6ff" font-size="18" font-weight="600">${escape(title)}</text><text x="696" y="${y}" fill="#f0f6fc" font-size="17" font-weight="600" text-anchor="end">${repository.count} Merged*</text>${tagMarkup}</a>`;
+              const tagText = tags.join("  ·  ");
+              return `<a href="https://github.com/${escape(repository.name)}"><text x="24" y="${y}" fill="#0366d6" font-size="18" font-weight="600">${escape(title)}</text><text x="736" y="${y}" fill="#24292f" font-size="16" font-weight="600" text-anchor="end">${repository.count} Merged</text><text x="24" y="${y + 24}" fill="#586069" font-size="13">${escape(tagText)}</text><path d="M24 ${y + 42}H736" stroke="#e1e4e8"/></a>`;
             }).join("");
             const height = 142 + selected.length * 82;
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}" viewBox="0 0 760 ${height}" role="img"><rect width="100%" height="100%" rx="14" fill="#0d1117"/><text x="24" y="42" fill="#f0f6fc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="24" font-weight="700">Upstream pull requests</text><text x="24" y="68" fill="#8b949e" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="14">External repositories, ranked by accepted pull requests</text><g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${rows || '<text x="24" y="112" fill="#8b949e" font-size="15">No qualifying pull requests found yet.</text>'}</g></svg>`;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}" viewBox="0 0 760 ${height}" role="img"><text x="24" y="38" fill="#24292f" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="22" font-weight="600">Repository contributions</text><text x="24" y="64" fill="#586069" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="14">External repositories, ranked by accepted pull requests</text><g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${rows || '<text x="24" y="112" fill="#586069" font-size="15">No qualifying pull requests found yet.</text>'}</g></svg>`;
             const path = "upstream-contributions.svg";
             let existing;
             try {
