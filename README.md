@@ -1,6 +1,6 @@
 # Cameron Beeley
 
-Open-source contributor and systems engineer.
+Open-source contributor
 
 ![GitHub metrics](./metrics.svg)
 
