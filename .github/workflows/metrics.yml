@@ -51,12 +51,15 @@ jobs:
           token: ${{ github.token }}
           user: anagnorisis2peripeteia
           filename: metrics.svg
-          base: header, activity, community, repositories, metadata
+          base: ""
+          plugin_isocalendar: yes
+          plugin_isocalendar_duration: full-year
           plugin_notable: yes
           plugin_notable_indepth: yes
           plugin_notable_repositories: yes
-          plugin_followup: yes
-          plugin_followup_sections: user
+          plugin_notable_filter: stars:>100
+          plugin_notable_self: no
+          plugin_notable_types: pull_request
 
       - name: Featured upstream repository cards
         uses: lowlighter/metrics@latest
