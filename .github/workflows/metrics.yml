@@ -20,26 +20,27 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const login = context.repo.owner;
-            const query = `is:pr author:${login} is:closed label:merged`;
-            const result = await github.rest.search.issuesAndPullRequests({
-              q: query,
-              per_page: 100,
-            });
+            const queries = [`is:pr author:${login} is:merged`, `is:pr author:${login} is:closed label:merged`];
+            const matches = new Map();
+            for (const query of queries) {
+              const { data } = await github.rest.search.issuesAndPullRequests({ q: query, per_page: 100 });
+              for (const item of data.items) matches.set(item.id, item);
+            }
             const repositories = new Map();
-            for (const item of result.data.items) {
+            for (const item of matches.values()) {
               const fullName = new URL(item.repository_url).pathname
                 .replace(/^\/repos\//, "");
+              const [owner, repo] = fullName.split("/");
+              if (owner.toLowerCase() === login.toLowerCase()) continue;
               if (!repositories.has(fullName)) {
                 const { data } = await github.rest.repos.get({
-                  owner: fullName.split("/")[0],
-                  repo: fullName.split("/")[1],
+                  owner, repo,
                 });
-                repositories.set(fullName, { stars: data.stargazers_count, count: 0 });
+                repositories.set(fullName, { stars: data.stargazers_count, language: data.language, topics: (data.topics || []).slice(0, 2), count: 0 });
               }
               repositories.get(fullName).count += 1;
             }
             const selected = [...repositories.entries()]
-              .filter(([, value]) => value.stars > 100)
               .sort((a, b) => b[1].count - a[1].count || b[1].stars - a[1].stars)
               .slice(0, 10)
               .map(([name, value]) => ({ name, ...value }));
@@ -47,14 +48,16 @@ jobs:
               "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;",
             })[char]);
             const rows = selected.map((repository, index) => {
-              const y = 96 + index * 58;
+              const y = 112 + index * 82;
               const title = repository.name.length > 46
                 ? `${repository.name.slice(0, 43)}...`
                 : repository.name;
-              return `<a href="https://github.com/${escape(repository.name)}"><rect x="24" y="${y - 30}" width="712" height="46" rx="10" fill="#161b22"/><text x="44" y="${y}" fill="#58a6ff" font-size="18" font-weight="600">${escape(title)}</text><text x="696" y="${y}" fill="#f0f6fc" font-size="17" font-weight="600" text-anchor="end">${repository.count} Merged*</text><text x="696" y="${y + 17}" fill="#8b949e" font-size="13" text-anchor="end">★ ${repository.stars.toLocaleString()}</text></a>`;
+              const tags = [repository.language, `★ ${repository.stars.toLocaleString()}`, ...repository.topics].filter(Boolean).slice(0, 4);
+              const tagMarkup = tags.map((tag, tagIndex) => `<text x="${44 + tagIndex * 136}" y="${y + 28}" fill="#8b949e" font-size="13">${escape(tag)}</text>`).join("");
+              return `<a href="https://github.com/${escape(repository.name)}"><rect x="24" y="${y - 34}" width="712" height="70" rx="10" fill="#161b22"/><text x="44" y="${y}" fill="#58a6ff" font-size="18" font-weight="600">${escape(title)}</text><text x="696" y="${y}" fill="#f0f6fc" font-size="17" font-weight="600" text-anchor="end">${repository.count} Merged*</text>${tagMarkup}</a>`;
             }).join("");
-            const height = 124 + selected.length * 58;
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}" viewBox="0 0 760 ${height}" role="img"><rect width="100%" height="100%" rx="14" fill="#0d1117"/><text x="24" y="42" fill="#f0f6fc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="24" font-weight="700">Upstream pull requests</text><text x="24" y="68" fill="#8b949e" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="14">Repositories with more than 100 stars, ranked by accepted pull requests</text><g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${rows || '<text x="24" y="112" fill="#8b949e" font-size="15">No qualifying pull requests found yet.</text>'}</g></svg>`;
+            const height = 142 + selected.length * 82;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}" viewBox="0 0 760 ${height}" role="img"><rect width="100%" height="100%" rx="14" fill="#0d1117"/><text x="24" y="42" fill="#f0f6fc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="24" font-weight="700">Upstream pull requests</text><text x="24" y="68" fill="#8b949e" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="14">External repositories, ranked by accepted pull requests</text><g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${rows || '<text x="24" y="112" fill="#8b949e" font-size="15">No qualifying pull requests found yet.</text>'}</g></svg>`;
             const path = "upstream-contributions.svg";
             let existing;
             try {
