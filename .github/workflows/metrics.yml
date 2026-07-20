@@ -42,31 +42,31 @@ jobs:
               .filter(([, value]) => value.stars > 100)
               .sort((a, b) => b[1].count - a[1].count || b[1].stars - a[1].stars)
               .slice(0, 10)
-              .map(([name]) => name);
-            core.setOutput("repositories", selected.join(","));
-
-      - name: General activity and notable contributions
-        uses: lowlighter/metrics@latest
-        with:
-          token: ${{ github.token }}
-          user: anagnorisis2peripeteia
-          filename: metrics.svg
-          base: ""
-          plugin_isocalendar: yes
-          plugin_isocalendar_duration: full-year
-          plugin_notable: yes
-          plugin_notable_indepth: yes
-          plugin_notable_repositories: yes
-          plugin_notable_filter: stars:>100
-          plugin_notable_self: no
-          plugin_notable_types: pull_request
-
-      - name: Featured upstream repository cards
-        uses: lowlighter/metrics@latest
-        with:
-          token: ${{ github.token }}
-          user: anagnorisis2peripeteia
-          filename: upstream-repositories.svg
-          base: ""
-          plugin_repositories: yes
-          plugin_repositories_featured: ${{ steps.upstream.outputs.repositories }}
+              .map(([name, value]) => ({ name, ...value }));
+            const escape = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+              "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;",
+            })[char]);
+            const rows = selected.map((repository, index) => {
+              const y = 96 + index * 58;
+              const title = repository.name.length > 46
+                ? `${repository.name.slice(0, 43)}...`
+                : repository.name;
+              return `<a href="https://github.com/${escape(repository.name)}"><rect x="24" y="${y - 30}" width="712" height="46" rx="10" fill="#161b22"/><text x="44" y="${y}" fill="#58a6ff" font-size="18" font-weight="600">${escape(title)}</text><text x="696" y="${y}" fill="#f0f6fc" font-size="17" font-weight="600" text-anchor="end">${repository.count} Merged*</text><text x="696" y="${y + 17}" fill="#8b949e" font-size="13" text-anchor="end">★ ${repository.stars.toLocaleString()}</text></a>`;
+            }).join("");
+            const height = 124 + selected.length * 58;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="${height}" viewBox="0 0 760 ${height}" role="img"><rect width="100%" height="100%" rx="14" fill="#0d1117"/><text x="24" y="42" fill="#f0f6fc" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="24" font-weight="700">Upstream pull requests</text><text x="24" y="68" fill="#8b949e" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="14">Repositories with more than 100 stars, ranked by accepted pull requests</text><g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif">${rows || '<text x="24" y="112" fill="#8b949e" font-size="15">No qualifying pull requests found yet.</text>'}</g></svg>`;
+            const path = "upstream-contributions.svg";
+            let existing;
+            try {
+              existing = await github.rest.repos.getContent({ ...context.repo, path });
+              if (Buffer.from(existing.data.content, "base64").toString("utf8") === svg) return;
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            await github.rest.repos.createOrUpdateFileContents({
+              ...context.repo,
+              path,
+              message: "Refresh upstream pull-request contributions",
+              content: Buffer.from(svg).toString("base64"),
+              ...(existing && { sha: existing.data.sha }),
+            });
