@@ -6,9 +6,9 @@
     <a href="https://github.com/openclaw/clawsweeper">
       <rect x="24" y="104" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="140" r="23" fill="#ddf4ff" stroke="#54aeff"/>
-      <text x="62" y="146" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">2004</text>
+      <text x="62" y="146" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">2006</text>
       <text x="96" y="126" fill="#0366d6" font-size="18" font-weight="600">openclaw/clawsweeper</text>
-      <text x="96" y="148" fill="#24292f" font-size="14" font-weight="500">4 PRs merged</text>
+      <text x="96" y="148" fill="#24292f" font-size="14" font-weight="500">6 PRs merged</text>
       <text x="96" y="170" fill="#586069" font-size="13">+2,272,150 added  ·  -1,945,397 removed</text>
       <text x="96" y="192" fill="#6a737d" font-size="12">TypeScript · ai · bot · openclaw</text>
       <path d="M24 182H736" stroke="#e1e4e8"/>
