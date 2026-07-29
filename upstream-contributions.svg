@@ -16,10 +16,10 @@
     <a href="https://github.com/openclaw/openclaw">
       <rect x="24" y="202" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="238" r="23" fill="#ddf4ff" stroke="#54aeff"/>
-      <text x="62" y="244" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">1067</text>
+      <text x="62" y="244" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">1068</text>
       <text x="96" y="224" fill="#0366d6" font-size="18" font-weight="600">openclaw/openclaw</text>
       <text x="96" y="246" fill="#24292f" font-size="14" font-weight="500">16 PRs merged</text>
-      <text x="96" y="268" fill="#586069" font-size="13">+368,376 added  ·  -57,666 removed</text>
+      <text x="96" y="268" fill="#586069" font-size="13">+375,862 added  ·  -58,063 removed</text>
       <text x="96" y="290" fill="#6a737d" font-size="12">TypeScript · ai · assistant · crustacean</text>
       <path d="M24 280H736" stroke="#e1e4e8"/>
     </a>
