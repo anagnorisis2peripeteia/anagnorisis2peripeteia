@@ -9,7 +9,7 @@
       <text x="62" y="146" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">2006</text>
       <text x="96" y="126" fill="#0366d6" font-size="18" font-weight="600">openclaw/clawsweeper</text>
       <text x="96" y="148" fill="#24292f" font-size="14" font-weight="500">6 PRs merged</text>
-      <text x="96" y="170" fill="#586069" font-size="13">+2,272,150 added  ·  -1,945,397 removed</text>
+      <text x="96" y="170" fill="#586069" font-size="13">+88,800 added  ·  -88,181 removed</text>
       <text x="96" y="192" fill="#6a737d" font-size="12">TypeScript · ai · bot · openclaw</text>
       <path d="M24 182H736" stroke="#e1e4e8"/>
     </a>
@@ -53,34 +53,34 @@
       <text x="96" y="584" fill="#6a737d" font-size="12">Swift · ai · claude-code · codex</text>
       <path d="M24 574H736" stroke="#e1e4e8"/>
     </a>
-    <a href="https://github.com/openclaw/crabfleet">
+    <a href="https://github.com/google-deepmind/formal-conjectures">
       <rect x="24" y="594" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="630" r="23" fill="#ddf4ff" stroke="#54aeff"/>
       <text x="62" y="636" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">4</text>
-      <text x="96" y="616" fill="#0366d6" font-size="18" font-weight="600">openclaw/crabfleet</text>
+      <text x="96" y="616" fill="#0366d6" font-size="18" font-weight="600">google-deepmind/formal-conjectures</text>
       <text x="96" y="638" fill="#24292f" font-size="14" font-weight="500">4 PRs merged</text>
       <text x="96" y="660" fill="#586069" font-size="13">+0 added  ·  -0 removed</text>
-      <text x="96" y="682" fill="#6a737d" font-size="12">TypeScript · agent · fleet · management</text>
+      <text x="96" y="682" fill="#6a737d" font-size="12">Lean · formal-mathematics · lean4</text>
       <path d="M24 672H736" stroke="#e1e4e8"/>
     </a>
-    <a href="https://github.com/pytorch/pytorch">
+    <a href="https://github.com/openclaw/crabfleet">
       <rect x="24" y="692" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="728" r="23" fill="#ddf4ff" stroke="#54aeff"/>
-      <text x="62" y="734" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">3</text>
-      <text x="96" y="714" fill="#0366d6" font-size="18" font-weight="600">pytorch/pytorch</text>
-      <text x="96" y="736" fill="#24292f" font-size="14" font-weight="500">3 PRs merged</text>
+      <text x="62" y="734" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">4</text>
+      <text x="96" y="714" fill="#0366d6" font-size="18" font-weight="600">openclaw/crabfleet</text>
+      <text x="96" y="736" fill="#24292f" font-size="14" font-weight="500">4 PRs merged</text>
       <text x="96" y="758" fill="#586069" font-size="13">+0 added  ·  -0 removed</text>
-      <text x="96" y="780" fill="#6a737d" font-size="12">Python · autograd · deep-learning · gpu</text>
+      <text x="96" y="780" fill="#6a737d" font-size="12">TypeScript · agent · fleet · management</text>
       <path d="M24 770H736" stroke="#e1e4e8"/>
     </a>
-    <a href="https://github.com/google-deepmind/formal-conjectures">
+    <a href="https://github.com/pytorch/pytorch">
       <rect x="24" y="790" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="826" r="23" fill="#ddf4ff" stroke="#54aeff"/>
       <text x="62" y="832" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">3</text>
-      <text x="96" y="812" fill="#0366d6" font-size="18" font-weight="600">google-deepmind/formal-conjectures</text>
+      <text x="96" y="812" fill="#0366d6" font-size="18" font-weight="600">pytorch/pytorch</text>
       <text x="96" y="834" fill="#24292f" font-size="14" font-weight="500">3 PRs merged</text>
       <text x="96" y="856" fill="#586069" font-size="13">+0 added  ·  -0 removed</text>
-      <text x="96" y="878" fill="#6a737d" font-size="12">Lean · formal-mathematics · lean4</text>
+      <text x="96" y="878" fill="#6a737d" font-size="12">Python · autograd · deep-learning · gpu</text>
       <path d="M24 868H736" stroke="#e1e4e8"/>
     </a>
     <a href="https://github.com/stryker-mutator/stryker-net">
