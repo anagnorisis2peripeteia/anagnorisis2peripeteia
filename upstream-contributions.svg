@@ -56,9 +56,9 @@
     <a href="https://github.com/google-deepmind/formal-conjectures">
       <rect x="24" y="594" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="630" r="23" fill="#ddf4ff" stroke="#54aeff"/>
-      <text x="62" y="636" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">6</text>
+      <text x="62" y="636" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">7</text>
       <text x="96" y="616" fill="#0366d6" font-size="18" font-weight="600">google-deepmind/formal-conjectures</text>
-      <text x="96" y="638" fill="#24292f" font-size="14" font-weight="500">6 PRs merged</text>
+      <text x="96" y="638" fill="#24292f" font-size="14" font-weight="500">7 PRs merged</text>
       <text x="96" y="660" fill="#586069" font-size="13">+0 added  ·  -0 removed</text>
       <text x="96" y="682" fill="#6a737d" font-size="12">Lean · formal-mathematics · lean4</text>
       <path d="M24 672H736" stroke="#e1e4e8"/>
