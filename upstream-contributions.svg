@@ -83,24 +83,24 @@
       <text x="96" y="878" fill="#6a737d" font-size="12">TypeScript · agent · fleet · management</text>
       <path d="M24 868H736" stroke="#e1e4e8"/>
     </a>
-    <a href="https://github.com/stryker-mutator/stryker-net">
+    <a href="https://github.com/google/XNNPACK">
       <rect x="24" y="888" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="924" r="23" fill="#ddf4ff" stroke="#54aeff"/>
       <text x="62" y="930" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">2</text>
-      <text x="96" y="910" fill="#0366d6" font-size="18" font-weight="600">stryker-mutator/stryker-net</text>
+      <text x="96" y="910" fill="#0366d6" font-size="18" font-weight="600">google/XNNPACK</text>
       <text x="96" y="932" fill="#24292f" font-size="14" font-weight="500">2 PRs merged</text>
       <text x="96" y="954" fill="#586069" font-size="13">+0 added  ·  -0 removed</text>
-      <text x="96" y="976" fill="#6a737d" font-size="12">C# · dotnet-core · dotnet-framework · dotnet-stryker</text>
+      <text x="96" y="976" fill="#6a737d" font-size="12">C · convolutional-neural-network · convolutional-neural-networks · cpu</text>
       <path d="M24 966H736" stroke="#e1e4e8"/>
     </a>
-    <a href="https://github.com/nefarius/HidHide">
+    <a href="https://github.com/stryker-mutator/stryker-net">
       <rect x="24" y="986" width="712" height="76" rx="12" fill="#0d1117" fill-opacity="0.03" stroke="#d0d7de"/>
       <circle cx="62" cy="1022" r="23" fill="#ddf4ff" stroke="#54aeff"/>
       <text x="62" y="1028" fill="#0969da" font-size="15" font-weight="700" text-anchor="middle">2</text>
-      <text x="96" y="1008" fill="#0366d6" font-size="18" font-weight="600">nefarius/HidHide</text>
+      <text x="96" y="1008" fill="#0366d6" font-size="18" font-weight="600">stryker-mutator/stryker-net</text>
       <text x="96" y="1030" fill="#24292f" font-size="14" font-weight="500">2 PRs merged</text>
       <text x="96" y="1052" fill="#586069" font-size="13">+0 added  ·  -0 removed</text>
-      <text x="96" y="1074" fill="#6a737d" font-size="12">C++</text>
+      <text x="96" y="1074" fill="#6a737d" font-size="12">C# · dotnet-core · dotnet-framework · dotnet-stryker</text>
       <path d="M24 1064H736" stroke="#e1e4e8"/>
     </a></g>
 </svg>
